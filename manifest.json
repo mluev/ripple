@@ -25,12 +25,14 @@
         "content/parsers/tweet-parser.js",
         "content/ui/notification.js",
         "content/ui/modal-controller.js",
+        "content/ui/multiple-mode.js",
         "content/ui/button-injector.js",
         "content/content-script.js"
       ],
       "css": [
         "content/styles/modal.css",
         "content/styles/button.css",
+        "content/styles/multiple-mode.css",
         "content/styles/animations.css"
       ],
       "run_at": "document_idle"

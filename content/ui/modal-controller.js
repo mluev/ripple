@@ -154,3 +154,156 @@ function showReplyModal(replies, postElement) {
 }
 
 window.showReplyModal = showReplyModal;
+
+/**
+ * Batch mode reply modal - shows post info and handles callback after reply
+ */
+function showBatchReplyModal(replies, postElement, tweetData, onReplySent) {
+  const existingModals = document.querySelectorAll('.ripple-modal-overlay');
+  existingModals.forEach(m => m.remove());
+
+  const modal = createBatchModalElement(replies, tweetData);
+
+  // Close button
+  modal.querySelector('.ripple-modal-close').addEventListener('click', () => closeBatchModal(modal));
+
+  // Click outside to close
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) closeBatchModal(modal);
+  });
+
+  // Escape key
+  const handleEscape = (e) => {
+    if (e.key === 'Escape') {
+      closeBatchModal(modal);
+      document.removeEventListener('keydown', handleEscape);
+    }
+  };
+  document.addEventListener('keydown', handleEscape);
+
+  // Save example buttons
+  modal.querySelectorAll('.save-example-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const index = parseInt(btn.getAttribute('data-index'));
+      saveExample(replies[index]);
+    });
+  });
+
+  // Reply card clicks - different flow for batch mode
+  modal.querySelectorAll('.reply-card').forEach((card, index) => {
+    card.addEventListener('click', async (e) => {
+      // Don't trigger if clicking save button
+      if (e.target.closest('.save-example-btn')) return;
+
+      // Keep modal data in memory
+      const selectedReply = replies[index];
+
+      // Close modal temporarily
+      closeBatchModal(modal);
+
+      // Insert reply and wait for user to send
+      await insertTextAndWaitForSend(selectedReply, postElement, () => {
+        // Callback after user sends the reply
+        if (onReplySent) {
+          onReplySent();
+        }
+      });
+    });
+  });
+
+  document.body.appendChild(modal);
+  requestAnimationFrame(() => {
+    modal.classList.add('ripple-modal-visible');
+  });
+}
+
+function createBatchModalElement(replies, tweetData) {
+  const modal = document.createElement('div');
+  modal.className = 'ripple-modal-overlay';
+  const replyCards = replies.map((reply, index) => createReplyCard(reply, index)).join('');
+
+  modal.innerHTML = `
+    <div class="ripple-modal-container">
+      <div class="ripple-modal-header">
+        <button class="ripple-modal-close" aria-label="Close">&times;</button>
+        <h2 class="ripple-modal-title">AI Replies</h2>
+      </div>
+      <div class="ripple-modal-tweet-preview">
+        <div class="tweet-preview-text">${escapeHTML(tweetData.text.substring(0, 100))}${tweetData.text.length > 100 ? '...' : ''}</div>
+      </div>
+      <div class="ripple-modal-body">
+        ${replyCards}
+      </div>
+    </div>
+  `;
+
+  return modal;
+}
+
+function closeBatchModal(modal) {
+  modal.classList.remove('ripple-modal-visible');
+  setTimeout(() => {
+    if (modal.parentNode) {
+      modal.parentNode.removeChild(modal);
+    }
+  }, 200);
+}
+
+async function insertTextAndWaitForSend(text, postElement, onSent) {
+  try {
+    const replyButton = postElement.querySelector('[data-testid="reply"]');
+    if (!replyButton) {
+      showNotification('error', 'Could not find reply button');
+      return;
+    }
+
+    replyButton.click();
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    const replyBox = document.querySelector('[data-testid="tweetTextarea_0"]');
+    if (!replyBox) {
+      showNotification('error', 'Could not find reply box');
+      return;
+    }
+
+    replyBox.focus();
+    document.execCommand('insertText', false, text);
+
+    // Monitor for reply being sent
+    // Watch for the reply dialog to close
+    const dialogObserver = new MutationObserver((mutations) => {
+      // Check if reply modal is gone
+      const replyModal = document.querySelector('[role="dialog"]');
+      const tweetTextarea = document.querySelector('[data-testid="tweetTextarea_0"]');
+
+      if (!replyModal || !tweetTextarea) {
+        // Reply was sent or canceled
+        dialogObserver.disconnect();
+
+        // Small delay to ensure the reply was sent (not canceled)
+        setTimeout(() => {
+          const stillOpen = document.querySelector('[data-testid="tweetTextarea_0"]');
+          if (!stillOpen) {
+            // Reply was actually sent
+            showNotification('success', 'Reply sent!');
+            if (onSent) {
+              onSent();
+            }
+          }
+        }, 100);
+      }
+    });
+
+    dialogObserver.observe(document.body, {
+      childList: true,
+      subtree: true
+    });
+
+  } catch (error) {
+    console.error('Error inserting text:', error);
+    showNotification('error', 'Failed to insert reply');
+  }
+}
+
+window.showBatchReplyModal = showBatchReplyModal;

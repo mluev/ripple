@@ -3,7 +3,7 @@
  * @description Main content script entry point
  */
 
-console.log('Smart Reply Extension - Content script loaded');
+console.log('Ripple Extension - Content script loaded');
 
 // Initialize when DOM is ready
 if (document.readyState === 'loading') {
@@ -13,11 +13,29 @@ if (document.readyState === 'loading') {
 }
 
 function init() {
-  console.log('Smart Reply Extension - Initializing...');
+  console.log('Ripple Extension - Initializing...');
 
   // Wait a bit for Twitter to load
   setTimeout(() => {
-    initButtonInjection();
+    try {
+      if (typeof initButtonInjection === 'function') {
+        initButtonInjection();
+      } else {
+        console.error('initButtonInjection is not defined');
+      }
+    } catch (error) {
+      console.error('Error initializing button injection:', error);
+    }
+
+    try {
+      if (typeof initMultipleMode === 'function') {
+        initMultipleMode();
+      } else {
+        console.error('initMultipleMode is not defined');
+      }
+    } catch (error) {
+      console.error('Error initializing multiple mode:', error);
+    }
   }, 1000);
 }
 

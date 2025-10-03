@@ -1,0 +1,116 @@
+/**
+ * Multiple Mode Styles - Matching X's Design
+ */
+
+/* Toggle button in header */
+.ripple-multiple-controls {
+  position: fixed;
+  top: 16px;
+  right: 10px;
+  z-index: 9999;
+}
+
+.ripple-multiple-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  background: transparent;
+  border: 1px solid rgb(47, 51, 54);
+  border-radius: 9999px;
+  color: rgb(231, 233, 234);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.ripple-multiple-toggle:hover {
+  background: rgba(29, 155, 240, 0.1);
+  border-color: rgb(29, 155, 240);
+  color: rgb(29, 155, 240);
+}
+
+.ripple-multiple-toggle.active {
+  background: rgb(29, 155, 240);
+  border-color: rgb(29, 155, 240);
+  color: rgb(255, 255, 255);
+}
+
+.ripple-multiple-toggle svg {
+  stroke: currentColor;
+  width: 18px;
+  height: 18px;
+}
+
+/* Generate button at bottom center */
+.ripple-generate-batch {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9998;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 24px;
+  background: rgb(29, 155, 240);
+  border: none;
+  border-radius: 9999px;
+  color: rgb(255, 255, 255);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: rgba(0, 0, 0, 0.3) 0px 4px 16px;
+  transition: all 0.2s;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+.ripple-generate-batch:hover:not(:disabled) {
+  background: rgb(26, 140, 216);
+}
+
+.ripple-generate-batch:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.ripple-generate-batch svg {
+  stroke: currentColor;
+}
+
+.ripple-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Checkbox wrapper - positioned in action bar */
+.ripple-checkbox-wrapper {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 38.75px;
+  height: 38.75px;
+  padding: 0;
+  margin: 0;
+  background-color: transparent;
+  border: none;
+  border-radius: 9999px;
+  transition: background-color 0.2s;
+}
+
+.ripple-checkbox-wrapper:hover {
+  background-color: rgba(29, 155, 240, 0.1);
+}
+
+.ripple-post-checkbox {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: rgb(29, 155, 240);
+  border-radius: 4px;
+}

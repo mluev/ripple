@@ -71,6 +71,19 @@
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
+.ripple-modal-tweet-preview {
+  padding: 12px 16px;
+  background: rgba(47, 51, 54, 0.3);
+  border-bottom: 1px solid rgb(47, 51, 54);
+}
+
+.tweet-preview-text {
+  font-size: 14px;
+  color: rgb(113, 118, 123);
+  line-height: 18px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
 .ripple-modal-body {
   padding: 0;
   max-height: 70vh;
