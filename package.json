@@ -1,0 +1,25 @@
+{
+  "name": "smart-reply-extension",
+  "version": "1.0.0",
+  "description": "AI-powered Twitter reply generation with Claude",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "twitter",
+    "ai",
+    "claude",
+    "reply",
+    "chrome-extension"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.20.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.0.0",
+    "prettier": "^3.0.0"
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "replyBox": [
+    "[data-testid='tweetTextarea_0']",
+    "[data-testid='tweetTextarea']",
+    ".DraftEditor-editorContainer",
+    "[contenteditable='true'][role='textbox']"
+  ],
+  "tweet": [
+    "article[data-testid='tweet']",
+    "article[role='article']"
+  ],
+  "tweetActionBar": [
+    "div[role='group'][aria-label*='repl']",
+    "div[role='group'][aria-label*='Repl']",
+    "[role='group'][aria-label]"
+  ],
+  "tweetText": [
+    "[data-testid='tweetText']",
+    "div[lang]"
+  ],
+  "tweetAuthor": [
+    "[data-testid='User-Name']",
+    "div[dir='ltr']"
+  ],
+  "replyButton": [
+    "[data-testid='reply']",
+    "button[aria-label*='Reply']"
+  ],
+  "likeButton": [
+    "[data-testid='like']",
+    "button[aria-label*='Like']"
+  ],
+  "retweetButton": [
+    "[data-testid='retweet']",
+    "button[aria-label*='Repost']"
+  ]
+}

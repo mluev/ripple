@@ -1,0 +1,66 @@
+{
+  "manifest_version": 3,
+  "name": "Ripple - AI Twitter Assistant",
+  "version": "1.0.0",
+  "description": "Generate personalized AI replies for Twitter using AI",
+  "permissions": [
+    "storage",
+    "activeTab"
+  ],
+  "host_permissions": [
+    "https://twitter.com/*",
+    "https://x.com/*",
+    "https://openrouter.ai/*"
+  ],
+  "background": {
+    "service_worker": "background/service-worker.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://twitter.com/*",
+        "https://x.com/*"
+      ],
+      "js": [
+        "content/parsers/tweet-parser.js",
+        "content/ui/notification.js",
+        "content/ui/modal-controller.js",
+        "content/ui/button-injector.js",
+        "content/content-script.js"
+      ],
+      "css": [
+        "content/styles/modal.css",
+        "content/styles/button.css",
+        "content/styles/animations.css"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_icon": {
+      "16": "assets/icons/icon16.png",
+      "48": "assets/icons/icon48.png",
+      "128": "assets/icons/icon128.png"
+    }
+  },
+  "options_page": "settings/settings.html",
+  "icons": {
+    "16": "assets/icons/icon16.png",
+    "48": "assets/icons/icon48.png",
+    "128": "assets/icons/icon128.png"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "config/*.json"
+      ],
+      "matches": [
+        "https://twitter.com/*",
+        "https://x.com/*"
+      ]
+    }
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+  }
+}

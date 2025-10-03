@@ -1,0 +1,89 @@
+/**
+ * AI Reply Button - Matching X's Action Button Style
+ */
+
+.ripple-ai-button {
+  /* Layout - matches X's action buttons */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 38.75px;
+  height: 38.75px;
+  padding: 0;
+  margin: 0;
+
+  /* Visual - matches X's gray icons */
+  background-color: transparent;
+  border: none;
+  border-radius: 9999px;
+  color: rgb(113, 118, 123); /* X's gray */
+
+  /* Interaction */
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+  outline: none;
+  position: relative;
+}
+
+/* Hover state - purple background tint */
+.ripple-ai-button:hover {
+  background-color: rgba(120, 86, 255, 0.1);
+  color: rgb(120, 86, 255);
+}
+
+/* Active/pressed state */
+.ripple-ai-button:active {
+  background-color: rgba(120, 86, 255, 0.2);
+}
+
+/* Focus visible for keyboard navigation */
+.ripple-ai-button:focus-visible {
+  outline: 2px solid rgb(120, 86, 255);
+  outline-offset: 2px;
+}
+
+/* Icon styling */
+.ripple-icon {
+  width: 18.75px;
+  height: 18.75px;
+  stroke: currentColor;
+  fill: none;
+}
+
+/* Loading state - blink pink */
+.ripple-ai-button[data-state="loading"] {
+  pointer-events: none;
+  animation: blink-pink 0.8s ease-in-out infinite;
+}
+
+/* Error state */
+.ripple-ai-button[data-state="error"] {
+  color: rgb(244, 33, 46);
+}
+
+.ripple-ai-button[data-state="error"]:hover {
+  background-color: rgba(244, 33, 46, 0.1);
+  color: rgb(244, 33, 46);
+}
+
+/* Disabled state */
+.ripple-ai-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* Blink pink animation for loading */
+@keyframes blink-pink {
+  0%, 100% {
+    background-color: transparent;
+    color: rgb(113, 118, 123);
+  }
+  50% {
+    background-color: rgba(249, 24, 128, 0.1);
+    color: rgb(249, 24, 128);
+  }
+}
+
+/* Dark mode - already matches X's dark theme */
+/* No changes needed as X uses the same colors in dark mode */

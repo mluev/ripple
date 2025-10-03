@@ -1,0 +1,17 @@
+{
+  "models": [
+    {
+      "id": "claude-3-5-sonnet-20241022",
+      "name": "Claude 3.5 Sonnet",
+      "provider": "anthropic",
+      "enabled": true,
+      "config": {
+        "endpoint": "https://api.anthropic.com/v1/messages",
+        "model": "claude-3-5-sonnet-20241022",
+        "maxTokens": 500,
+        "temperature": 0.8,
+        "apiVersion": "2023-06-01"
+      }
+    }
+  ]
+}

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ripple - Settings</title>
+  <link rel="stylesheet" href="styles/settings.css">
+</head>
+<body>
+  <div class="settings-container">
+    <header class="settings-header">
+      <h1 class="settings-title">Ripple Settings</h1>
+    </header>
+
+    <!-- API Configuration Section -->
+    <section class="settings-section">
+      <h2 class="settings-section__title">API Configuration</h2>
+
+      <div class="form-group">
+        <label for="openrouterKey" class="form-label">OpenRouter API Key</label>
+        <div class="input-wrapper">
+          <input
+            type="password"
+            id="openrouterKey"
+            class="form-input"
+            placeholder="sk-or-v1-..."
+            autocomplete="off"
+          >
+          <button type="button" id="toggleOpenrouterKey" class="toggle-visibility-btn" aria-label="Toggle API key visibility">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+          </button>
+        </div>
+        <p class="form-hint">
+          Get your API key from <a href="https://openrouter.ai/keys" target="_blank">OpenRouter</a>. This key works for all models.
+        </p>
+      </div>
+
+      <div class="form-group">
+        <label for="modelSelect" class="form-label">AI Model</label>
+        <select id="modelSelect" class="form-input">
+          <optgroup label="Anthropic Claude">
+            <option value="anthropic/claude-sonnet-4-20250514">Claude 4.5 Sonnet (Latest)</option>
+            <option value="anthropic/claude-opus-4-20250514">Claude 4 Opus</option>
+            <option value="anthropic/claude-sonnet-4-20250514">Claude 4 Sonnet</option>
+            <option value="anthropic/claude-3-7-sonnet-20250219">Claude 3.7 Sonnet</option>
+            <option value="anthropic/claude-3-5-sonnet-20241022">Claude 3.5 Sonnet</option>
+            <option value="anthropic/claude-3-5-haiku-20241022">Claude 3.5 Haiku</option>
+            <option value="anthropic/claude-3-opus-20240229">Claude 3 Opus</option>
+          </optgroup>
+          <optgroup label="OpenAI">
+            <option value="openai/gpt-4o">GPT-4o</option>
+            <option value="openai/gpt-4o-mini">GPT-4o Mini</option>
+            <option value="openai/gpt-4-turbo">GPT-4 Turbo</option>
+            <option value="openai/gpt-4">GPT-4</option>
+            <option value="openai/gpt-3.5-turbo">GPT-3.5 Turbo</option>
+          </optgroup>
+        </select>
+        <p class="form-hint">
+          Choose which AI model to use for generating replies
+        </p>
+      </div>
+    </section>
+
+    <!-- System Prompt Section -->
+    <section class="settings-section">
+      <h2 class="settings-section__title">System Prompt</h2>
+
+      <div class="form-group">
+        <label for="systemPrompt" class="form-label">
+          Custom System Prompt (Optional)
+        </label>
+        <textarea
+          id="systemPrompt"
+          class="form-textarea"
+          rows="6"
+          placeholder="You are helping write Twitter replies..."
+        ></textarea>
+        <p class="form-hint">
+          Customize how the AI generates replies. Leave empty to use default.
+        </p>
+      </div>
+    </section>
+
+    <!-- Examples Section -->
+    <section class="settings-section">
+      <h2 class="settings-section__title">Saved Examples</h2>
+
+      <div id="examplesList" class="examples-list">
+        <!-- Examples will be loaded here -->
+      </div>
+    </section>
+
+    <!-- Save Button -->
+    <div class="settings-footer">
+      <button type="button" id="saveSettings" class="button-primary">
+        Save Settings
+      </button>
+      <div id="saveStatus" class="status-message"></div>
+    </div>
+  </div>
+
+  <script src="settings.js"></script>
+</body>
+</html>

@@ -1,0 +1,216 @@
+/**
+ * Settings - X Style (Dark)
+ */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background: rgb(0, 0, 0);
+  color: rgb(231, 233, 234);
+  line-height: 1.5;
+  padding: 0;
+  margin: 0;
+}
+
+.settings-container {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.settings-header {
+  position: sticky;
+  top: 0;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(12px);
+  padding: 12px 16px;
+  border-bottom: 1px solid rgb(47, 51, 54);
+  z-index: 100;
+}
+
+.settings-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: rgb(231, 233, 234);
+}
+
+.settings-section {
+  border-bottom: 1px solid rgb(47, 51, 54);
+  padding: 16px;
+}
+
+.settings-section__title {
+  font-size: 20px;
+  font-weight: 700;
+  color: rgb(231, 233, 234);
+  margin-bottom: 16px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-label {
+  display: block;
+  font-size: 15px;
+  font-weight: 700;
+  color: rgb(231, 233, 234);
+  margin-bottom: 8px;
+}
+
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-wrapper .form-input {
+  padding-right: 45px;
+}
+
+.toggle-visibility-btn {
+  position: absolute;
+  right: 8px;
+  background: transparent;
+  border: none;
+  color: rgb(113, 118, 123);
+  padding: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.toggle-visibility-btn:hover {
+  background: rgba(239, 243, 244, 0.1);
+  color: rgb(231, 233, 234);
+}
+
+.form-input,
+.form-textarea {
+  width: 100%;
+  padding: 12px;
+  background: rgb(0, 0, 0);
+  border: 1px solid rgb(47, 51, 54);
+  border-radius: 4px;
+  font-size: 15px;
+  color: rgb(231, 233, 234);
+  font-family: inherit;
+  transition: border-color 0.2s;
+}
+
+.form-input:focus,
+.form-textarea:focus {
+  outline: none;
+  border-color: rgb(29, 155, 240);
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.form-hint {
+  font-size: 13px;
+  color: rgb(113, 118, 123);
+  margin-top: 6px;
+}
+
+.button-primary {
+  width: 100%;
+  padding: 12px 24px;
+  background: rgb(29, 155, 240);
+  color: rgb(255, 255, 255);
+  border: none;
+  border-radius: 9999px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  font-family: inherit;
+}
+
+.button-primary:hover {
+  background: rgb(26, 140, 216);
+}
+
+.button-primary:active {
+  background: rgb(23, 126, 194);
+}
+
+.button-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.button-secondary {
+  padding: 8px 16px;
+  background: transparent;
+  color: rgb(29, 155, 240);
+  border: 1px solid rgb(47, 51, 54);
+  border-radius: 9999px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.button-secondary:hover {
+  background: rgba(29, 155, 240, 0.1);
+  border-color: rgb(29, 155, 240);
+}
+
+.button-icon {
+  background: transparent;
+  border: 1px solid rgb(47, 51, 54);
+  color: rgb(231, 233, 234);
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.2s;
+}
+
+.button-icon:hover {
+  background: rgba(239, 243, 244, 0.1);
+  border-color: rgb(83, 100, 113);
+}
+
+.status-message {
+  padding: 12px;
+  border-radius: 4px;
+  margin-top: 12px;
+  font-size: 14px;
+  display: none;
+}
+
+.status-message.success {
+  display: block;
+  background: rgba(0, 186, 124, 0.1);
+  color: rgb(0, 186, 124);
+  border: 1px solid rgb(0, 186, 124);
+}
+
+.status-message.error {
+  display: block;
+  background: rgba(244, 33, 46, 0.1);
+  color: rgb(244, 33, 46);
+  border: 1px solid rgb(244, 33, 46);
+}
+
+#examplesList {
+  margin-top: 16px;
+}
+
+@media (max-width: 640px) {
+  .settings-container {
+    max-width: 100%;
+  }
+}
