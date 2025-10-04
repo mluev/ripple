@@ -39,11 +39,16 @@ async function handleButtonClick(event, button, postElement) {
 
   try {
     const result = await chrome.storage.sync.get('settings');
-    const openrouterKey = result.settings?.openrouterKey;
-    const model = result.settings?.model || 'anthropic/claude-sonnet-4-20250514';
+    let apiKey = result.settings?.apiKey || result.settings?.openrouterKey;
+    let model = result.settings?.model || 'claude-sonnet-4-20250514';
 
-    if (!openrouterKey) {
-      throw new Error('Please configure your OpenRouter API key in settings');
+    // Migrate old model format
+    if (model && model.includes('/')) {
+      model = model.split('/')[1];
+    }
+
+    if (!apiKey) {
+      throw new Error('Please configure your Anthropic API key in settings');
     }
 
     const tweetData = await extractTweetData(postElement);
@@ -56,7 +61,7 @@ async function handleButtonClick(event, button, postElement) {
     chrome.runtime.sendMessage({
       action: 'generate-reply',
       tweetText: tweetData.text,
-      openrouterKey: openrouterKey,
+      apiKey: apiKey,
       model: model
     }, (response) => {
       setButtonState(button, 'default');

@@ -11,47 +11,74 @@ chrome.action.onClicked.addListener(() => {
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === 'generate-reply') {
-    handleGenerateReply(message.tweetText, message.openrouterKey, message.model)
+    handleGenerateReply(message.tweetText, message.apiKey, message.model)
       .then(replies => sendResponse({ success: true, replies }))
       .catch(error => sendResponse({ success: false, error: error.message }));
     return true;
   }
 
   if (message.action === 'generate-batch-replies') {
-    handleBatchGenerateReplies(message.tweets, message.openrouterKey, message.model, message.systemPrompt, message.examples)
+    handleBatchGenerateReplies(message.tweets, message.apiKey, message.model, message.systemPrompt, message.examples)
       .then(repliesArray => sendResponse({ success: true, repliesArray }))
       .catch(error => sendResponse({ success: false, error: error.message }));
     return true;
   }
 });
 
-async function handleGenerateReply(tweetText, openrouterKey, model = 'anthropic/claude-sonnet-4-20250514') {
-  console.log('Generating replies for:', tweetText);
-  console.log('Using model:', model);
+async function handleGenerateReply(tweetText, apiKey, model = 'claude-sonnet-4-20250514', systemPrompt = '') {
+  console.log('\n\n🚀 ========================================');
+  console.log('🚀 SINGLE REPLY REQUEST TO AI');
+  console.log('🚀 ========================================');
+  console.log('Tweet:', tweetText);
+  console.log('Model:', model);
 
-  if (!openrouterKey) {
+  if (!apiKey) {
     throw new Error('No auth credentials found');
   }
 
-  const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+  // Get system prompt from storage if not provided
+  if (!systemPrompt) {
+    const result = await chrome.storage.sync.get('settings');
+    systemPrompt = result.settings?.systemPrompt || '';
+  }
+
+  const userPrompt = systemPrompt
+    ? `${systemPrompt}\n\nTweet: "${tweetText}"`
+    : `Generate 3 natural, conversational replies to this tweet:\n\nTweet: "${tweetText}"`;
+
+  // Comprehensive logging
+  console.log('\n📝 SYSTEM PROMPT:', systemPrompt ? '✅ YES' : '❌ NO');
+  if (systemPrompt) {
+    console.log('   Length:', systemPrompt.length, 'characters');
+    console.log('   Preview:', systemPrompt.substring(0, 150) + '...\n');
+  }
+
+  const requestBody = {
+    model: model,
+    max_tokens: 1024,
+    messages: [{
+      role: 'user',
+      content: userPrompt
+    }]
+  };
+
+  console.log('📦 EXACT REQUEST BODY:');
+  console.log(JSON.stringify(requestBody, null, 2));
+  console.log('\n📨 FULL MESSAGE CONTENT SENT TO AI:');
+  console.log('---START---');
+  console.log(requestBody.messages[0].content);
+  console.log('---END---');
+  console.log('========================================\n\n');
+
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${openrouterKey}`,
-      'HTTP-Referer': 'https://github.com/yourusername/ripple',
-      'X-Title': 'Ripple'
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
     },
-    body: JSON.stringify({
-      model: model,
-      messages: [{
-        role: 'user',
-        content: `Generate 3 different short, engaging replies to this tweet. Make them conversational and varied in tone (friendly, thoughtful, funny). Return ONLY a JSON array with no other text:
-
-Tweet: "${tweetText}"
-
-Format: ["reply 1", "reply 2", "reply 3"]`
-      }]
-    })
+    body: JSON.stringify(requestBody)
   });
 
   if (!response.ok) {
@@ -60,21 +87,74 @@ Format: ["reply 1", "reply 2", "reply 3"]`
   }
 
   const data = await response.json();
-  const text = data.choices[0].message.content;
+  const text = data.content[0].text;
 
-  const jsonMatch = text.match(/\[.*\]/s);
-  if (!jsonMatch) {
-    throw new Error('Invalid API response format');
+  console.log('=== RAW API RESPONSE ===');
+  console.log(text);
+  console.log('=== END RESPONSE ===');
+
+  // Try to parse "Option 1:" format first
+  const optionMatches = text.match(/Option \d+:\s*(.+?)(?=\nOption \d+:|$)/gs);
+  if (optionMatches && optionMatches.length >= 3) {
+    const parsed = optionMatches.slice(0, 3).map(match => {
+      // Extract just the reply text, remove "Option X:" prefix
+      let replyText = match.replace(/Option \d+:\s*/, '').trim();
+      // Remove any trailing newlines or extra whitespace
+      replyText = replyText.replace(/\n+$/, '').trim();
+      // Remove numbering at the start (1., 2., 3. etc)
+      replyText = replyText.replace(/^\d+\.\s*/, '');
+      // Remove bullets at the start (•, -, * etc)
+      replyText = replyText.replace(/^[•\-*]\s*/, '');
+      return replyText;
+    });
+    console.log('✅ Parsed replies (Option format):', parsed);
+    return parsed;
   }
 
-  return JSON.parse(jsonMatch[0]);
+  // Fallback to JSON format
+  const jsonMatch = text.match(/\[.*\]/s);
+  if (jsonMatch) {
+    const parsed = JSON.parse(jsonMatch[0]);
+    console.log('✅ Parsed replies (JSON format):', parsed);
+    return parsed;
+  }
+
+  // Last resort: split by newlines and take first 3 non-empty lines
+  // Skip any preamble text (lines that look like instructions)
+  const lines = text.split('\n')
+    .map(line => line.trim())
+    .filter(line => {
+      // Skip empty lines
+      if (!line) return false;
+      // Skip lines that look like preamble (e.g., "Here are 3 natural replies:")
+      if (line.toLowerCase().includes('here are') ||
+          line.toLowerCase().includes('natural replies') ||
+          line.toLowerCase().includes('conversational')) {
+        return false;
+      }
+      return true;
+    });
+
+  if (lines.length >= 3) {
+    const parsed = lines.slice(0, 3);
+    console.log('✅ Parsed replies (line-by-line):', parsed);
+    return parsed;
+  }
+
+  console.error('❌ Could not parse response');
+  throw new Error('Invalid API response format');
 }
 
-async function handleBatchGenerateReplies(tweets, openrouterKey, model = 'anthropic/claude-sonnet-4-20250514', systemPrompt = '', examples = []) {
-  console.log('Generating batch replies for', tweets.length, 'tweets');
-  console.log('Using model:', model);
+async function handleBatchGenerateReplies(tweets, apiKey, model = 'claude-sonnet-4-20250514', systemPrompt = '', examples = []) {
+  console.log('\n\n🚀 ========================================');
+  console.log('🚀 BATCH REPLY REQUEST TO AI');
+  console.log('🚀 ========================================');
+  console.log('Number of tweets:', tweets.length);
+  console.log('Model:', model);
+  console.log('📝 SYSTEM PROMPT:', systemPrompt ? '✅ YES' : '❌ NO');
+  console.log('📚 EXAMPLES:', examples?.length || 0);
 
-  if (!openrouterKey) {
+  if (!apiKey) {
     throw new Error('No auth credentials found');
   }
 
@@ -87,32 +167,60 @@ async function handleBatchGenerateReplies(tweets, openrouterKey, model = 'anthro
       promptContent += `${i + 1}. "${ex.text}"\n`;
     });
     promptContent += '\n';
+    console.log('\n📚 EXAMPLES ADDED TO PROMPT:');
+    examples.slice(0, 5).forEach((ex, i) => {
+      console.log(`   ${i + 1}. "${ex.text}"`);
+    });
   }
 
-  promptContent += `Generate 3 different short, engaging replies for EACH of the following tweets. Make them conversational and varied in tone (friendly, thoughtful, funny).
+  promptContent += `Generate replies for ${tweets.length} tweets below. For EACH tweet, provide 3 reply options in this exact format:
 
-Return ONLY a JSON array of arrays, where each inner array contains 3 replies for the corresponding tweet:
+Tweet 1: [tweet text]
+Option 1: [reply]
+Option 2: [reply]
+Option 3: [reply]
+
+Tweet 2: [tweet text]
+Option 1: [reply]
+Option 2: [reply]
+Option 3: [reply]
 
 Tweets:
-${tweets.map((t, i) => `${i + 1}. "${t}"`).join('\n')}
+${tweets.map((t, i) => `Tweet ${i + 1}: "${t}"`).join('\n\n')}`;
 
-Format: [["reply1", "reply2", "reply3"], ["reply1", "reply2", "reply3"], ...]`;
+  // Comprehensive logging
+  if (systemPrompt) {
+    console.log('\n📝 SYSTEM PROMPT DETAILS:');
+    console.log('   Length:', systemPrompt.length, 'characters');
+    console.log('   Preview:', systemPrompt.substring(0, 150) + '...\n');
+  }
 
-  const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+  const requestBody = {
+    model: model,
+    max_tokens: 2048,
+    messages: [{
+      role: 'user',
+      content: promptContent
+    }]
+  };
+
+  console.log('📦 EXACT REQUEST BODY:');
+  console.log(JSON.stringify(requestBody, null, 2));
+  console.log('\n📨 FULL MESSAGE CONTENT SENT TO AI:');
+  console.log('---START---');
+  console.log(requestBody.messages[0].content);
+  console.log('---END---');
+  console.log('========================================\n\n');
+
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${openrouterKey}`,
-      'HTTP-Referer': 'https://github.com/yourusername/ripple',
-      'X-Title': 'Ripple'
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
     },
-    body: JSON.stringify({
-      model: model,
-      messages: [{
-        role: 'user',
-        content: promptContent
-      }]
-    })
+    body: JSON.stringify(requestBody)
   });
 
   if (!response.ok) {
@@ -121,14 +229,44 @@ Format: [["reply1", "reply2", "reply3"], ["reply1", "reply2", "reply3"], ...]`;
   }
 
   const data = await response.json();
-  const text = data.choices[0].message.content;
+  const text = data.content[0].text;
 
-  const jsonMatch = text.match(/\[[\s\S]*\]/);
-  if (!jsonMatch) {
-    throw new Error('Invalid API response format');
+  console.log('=== RAW BATCH API RESPONSE ===');
+  console.log(text);
+  console.log('=== END BATCH RESPONSE ===');
+
+  // Parse the "Tweet X: / Option 1/2/3:" format
+  const repliesArray = [];
+  const tweetSections = text.split(/Tweet \d+:/g).filter(s => s.trim());
+
+  console.log('Found', tweetSections.length, 'tweet sections');
+
+  for (const section of tweetSections) {
+    const optionMatches = section.match(/Option \d+:\s*(.+?)(?=\nOption \d+:|$)/gs);
+    if (optionMatches && optionMatches.length >= 3) {
+      const replies = optionMatches.slice(0, 3).map(match => {
+        // Extract just the reply text, remove "Option X:" prefix
+        let replyText = match.replace(/Option \d+:\s*/, '').trim();
+        // Remove any trailing newlines or extra whitespace
+        replyText = replyText.replace(/\n+$/, '').trim();
+        // Remove numbering at the start (1., 2., 3. etc)
+        replyText = replyText.replace(/^\d+\.\s*/, '');
+        // Remove bullets at the start (•, -, * etc)
+        replyText = replyText.replace(/^[•\-*]\s*/, '');
+        return replyText;
+      });
+      console.log('✅ Parsed section replies:', replies);
+      repliesArray.push(replies);
+    }
   }
 
-  const repliesArray = JSON.parse(jsonMatch[0]);
+  // Fallback to JSON format
+  if (repliesArray.length === 0) {
+    const jsonMatch = text.match(/\[[\s\S]*\]/);
+    if (jsonMatch) {
+      return JSON.parse(jsonMatch[0]);
+    }
+  }
 
   // Validate that we got the right number of reply sets
   if (repliesArray.length !== tweets.length) {

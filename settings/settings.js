@@ -2,13 +2,13 @@
  * Settings page - simplified
  */
 
-const openrouterKeyInput = document.getElementById('openrouterKey');
+const apiKeyInput = document.getElementById('apiKey');
 const modelSelect = document.getElementById('modelSelect');
 const systemPromptTextarea = document.getElementById('systemPrompt');
 const saveSettingsButton = document.getElementById('saveSettings');
 const saveStatus = document.getElementById('saveStatus');
 const examplesList = document.getElementById('examplesList');
-const toggleOpenrouterKeyBtn = document.getElementById('toggleOpenrouterKey');
+const toggleApiKeyBtn = document.getElementById('toggleApiKey');
 
 let currentSettings = {};
 let currentExamples = [];
@@ -23,23 +23,85 @@ document.addEventListener('DOMContentLoaded', async () => {
 saveSettingsButton.addEventListener('click', saveSettings);
 
 // Toggle API key visibility
-toggleOpenrouterKeyBtn.addEventListener('click', () => {
-  const type = openrouterKeyInput.type === 'password' ? 'text' : 'password';
-  openrouterKeyInput.type = type;
+toggleApiKeyBtn.addEventListener('click', () => {
+  const type = apiKeyInput.type === 'password' ? 'text' : 'password';
+  apiKeyInput.type = type;
 });
+
+const DEFAULT_SYSTEM_PROMPT = `You are a Twitter reply ghostwriter that helps users engage authentically on Twitter.
+Your replies must sound human, natural, and conversational — never robotic or AI-generated.
+
+Core Mission: Generate 3 distinct reply options for any tweet the user shares.
+Each reply should feel like something a real person would type quickly on their phone.
+
+Output Format (IMPORTANT - follow exactly):
+Option 1: [reply text without any numbering or bullets]
+Option 2: [reply text without any numbering or bullets]
+Option 3: [reply text without any numbering or bullets]
+
+DO NOT include numbering (1., 2., 3.) or bullets (•, -, *) in the reply text itself.
+DO NOT start replies with numbers or symbols - just write the plain text.
+
+Variety Requirements:
+- Each reply must take a different angle (supportive, funny, curious, insightful, playful)
+- Vary length: mix short punchy replies (5-15 words) with slightly longer ones (20-40 words)
+- Rotate emotional tones: encouraging, witty, genuine, thoughtful, casual
+
+Natural Writing Style:
+- Write like texting a friend, not composing an email
+- Use natural speech patterns: "tbh", "ngl", "wait", "honestly", "lol" (sparingly)
+- Sentence fragments are fine: "This. Exactly this."
+- Start with lowercase sometimes if it feels natural
+- Use em dashes, ellipses naturally — not formally
+
+Anti-AI Signals (What to AVOID):
+❌ "Great question!" / "Well said!" / "This resonates with me"
+❌ Over-explanation or essay-length replies
+❌ Perfect grammar every time
+❌ Corporate/professional tone
+❌ Starting with "As someone who..."
+
+DO Include:
+✅ Genuine reactions: "wait what", "no way", "this is wild"
+✅ Personal micro-stories: "literally just happened to me"
+✅ Specific details over generic praise
+✅ Light humor or self-deprecation when fitting
+✅ Emoji (1-2 max, and only when natural)
+
+Default mode: Friendly, curious professional. Slightly casual but not overly Gen Z. Smart but not preachy.
+
+Twitter limit: 280 characters — stay well under when possible for readability.
+
+Jump straight to replies. No preamble needed.`;
 
 async function loadSettings() {
   try {
     const result = await chrome.storage.sync.get('settings');
     currentSettings = result.settings || {
-      openrouterKey: '',
-      model: 'anthropic/claude-sonnet-4-20250514',
-      systemPrompt: ''
+      apiKey: '',
+      model: 'claude-sonnet-4-20250514',
+      systemPrompt: DEFAULT_SYSTEM_PROMPT
     };
 
-    openrouterKeyInput.value = currentSettings.openrouterKey || '';
-    modelSelect.value = currentSettings.model || 'anthropic/claude-sonnet-4-20250514';
-    systemPromptTextarea.value = currentSettings.systemPrompt || '';
+    // Migrate old model format (remove provider prefix)
+    if (currentSettings.model && currentSettings.model.includes('/')) {
+      currentSettings.model = currentSettings.model.split('/')[1];
+    }
+
+    // Migrate openrouterKey to apiKey if exists
+    if (currentSettings.openrouterKey && !currentSettings.apiKey) {
+      currentSettings.apiKey = currentSettings.openrouterKey;
+      delete currentSettings.openrouterKey;
+    }
+
+    // Set default system prompt if empty
+    if (!currentSettings.systemPrompt) {
+      currentSettings.systemPrompt = DEFAULT_SYSTEM_PROMPT;
+    }
+
+    apiKeyInput.value = currentSettings.apiKey || '';
+    modelSelect.value = currentSettings.model || 'claude-sonnet-4-20250514';
+    systemPromptTextarea.value = currentSettings.systemPrompt || DEFAULT_SYSTEM_PROMPT;
   } catch (error) {
     console.error('Error loading settings:', error);
     showStatus('error', 'Error loading settings');
@@ -47,16 +109,16 @@ async function loadSettings() {
 }
 
 async function saveSettings() {
-  const openrouterKey = openrouterKeyInput.value.trim();
+  const apiKey = apiKeyInput.value.trim();
   const selectedModel = modelSelect.value;
 
-  if (!openrouterKey) {
-    showStatus('error', 'OpenRouter API key is required');
+  if (!apiKey) {
+    showStatus('error', 'Anthropic API key is required');
     return;
   }
 
-  if (!openrouterKey.startsWith('sk-or-')) {
-    showStatus('error', 'Invalid OpenRouter API key format (should start with sk-or-)');
+  if (!apiKey.startsWith('sk-ant-')) {
+    showStatus('error', 'Invalid Anthropic API key format (should start with sk-ant-)');
     return;
   }
 
@@ -65,7 +127,7 @@ async function saveSettings() {
 
   try {
     const settings = {
-      openrouterKey: openrouterKey,
+      apiKey: apiKey,
       model: selectedModel,
       systemPrompt: systemPromptTextarea.value.trim()
     };

@@ -17,16 +17,16 @@
       <h2 class="settings-section__title">API Configuration</h2>
 
       <div class="form-group">
-        <label for="openrouterKey" class="form-label">OpenRouter API Key</label>
+        <label for="apiKey" class="form-label">Anthropic API Key</label>
         <div class="input-wrapper">
           <input
             type="password"
-            id="openrouterKey"
+            id="apiKey"
             class="form-input"
-            placeholder="sk-or-v1-..."
+            placeholder="sk-ant-..."
             autocomplete="off"
           >
-          <button type="button" id="toggleOpenrouterKey" class="toggle-visibility-btn" aria-label="Toggle API key visibility">
+          <button type="button" id="toggleApiKey" class="toggle-visibility-btn" aria-label="Toggle API key visibility">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
               <circle cx="12" cy="12" r="3"></circle>
@@ -34,32 +34,23 @@
           </button>
         </div>
         <p class="form-hint">
-          Get your API key from <a href="https://openrouter.ai/keys" target="_blank">OpenRouter</a>. This key works for all models.
+          Get your API key from <a href="https://console.anthropic.com/" target="_blank">Anthropic Console</a>
         </p>
       </div>
 
       <div class="form-group">
-        <label for="modelSelect" class="form-label">AI Model</label>
+        <label for="modelSelect" class="form-label">Claude Model</label>
         <select id="modelSelect" class="form-input">
-          <optgroup label="Anthropic Claude">
-            <option value="anthropic/claude-sonnet-4-20250514">Claude 4.5 Sonnet (Latest)</option>
-            <option value="anthropic/claude-opus-4-20250514">Claude 4 Opus</option>
-            <option value="anthropic/claude-sonnet-4-20250514">Claude 4 Sonnet</option>
-            <option value="anthropic/claude-3-7-sonnet-20250219">Claude 3.7 Sonnet</option>
-            <option value="anthropic/claude-3-5-sonnet-20241022">Claude 3.5 Sonnet</option>
-            <option value="anthropic/claude-3-5-haiku-20241022">Claude 3.5 Haiku</option>
-            <option value="anthropic/claude-3-opus-20240229">Claude 3 Opus</option>
-          </optgroup>
-          <optgroup label="OpenAI">
-            <option value="openai/gpt-4o">GPT-4o</option>
-            <option value="openai/gpt-4o-mini">GPT-4o Mini</option>
-            <option value="openai/gpt-4-turbo">GPT-4 Turbo</option>
-            <option value="openai/gpt-4">GPT-4</option>
-            <option value="openai/gpt-3.5-turbo">GPT-3.5 Turbo</option>
-          </optgroup>
+          <option value="claude-sonnet-4-20250514">Claude 4.5 Sonnet (Latest)</option>
+          <option value="claude-opus-4-20250514">Claude 4 Opus</option>
+          <option value="claude-sonnet-4-20250514">Claude 4 Sonnet</option>
+          <option value="claude-3-7-sonnet-20250219">Claude 3.7 Sonnet</option>
+          <option value="claude-3-5-sonnet-20241022">Claude 3.5 Sonnet</option>
+          <option value="claude-3-5-haiku-20241022">Claude 3.5 Haiku</option>
+          <option value="claude-3-opus-20240229">Claude 3 Opus</option>
         </select>
         <p class="form-hint">
-          Choose which AI model to use for generating replies
+          Choose which Claude model to use for generating replies
         </p>
       </div>
     </section>

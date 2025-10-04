@@ -141,12 +141,17 @@ async function handleBatchGenerate() {
 
   try {
     const result = await chrome.storage.sync.get('settings');
-    const openrouterKey = result.settings?.openrouterKey;
-    const model = result.settings?.model || 'anthropic/claude-sonnet-4-20250514';
+    let apiKey = result.settings?.apiKey || result.settings?.openrouterKey;
+    let model = result.settings?.model || 'claude-sonnet-4-20250514';
     const systemPrompt = result.settings?.systemPrompt || '';
 
-    if (!openrouterKey) {
-      throw new Error('Please configure your OpenRouter API key in settings');
+    // Migrate old model format
+    if (model && model.includes('/')) {
+      model = model.split('/')[1];
+    }
+
+    if (!apiKey) {
+      throw new Error('Please configure your Anthropic API key in settings');
     }
 
     // Get examples
@@ -160,7 +165,7 @@ async function handleBatchGenerate() {
     chrome.runtime.sendMessage({
       action: 'generate-batch-replies',
       tweets: tweets,
-      openrouterKey: openrouterKey,
+      apiKey: apiKey,
       model: model,
       systemPrompt: systemPrompt,
       examples: examples
@@ -177,11 +182,20 @@ async function handleBatchGenerate() {
 
         // Store replies for each post
         const postsArray = Array.from(selectedPosts.keys());
+        const repliesData = [];
+
         response.repliesArray.forEach((replies, index) => {
           const postElement = postsArray[index];
           const postData = selectedPosts.get(postElement);
           postData.replies = replies;
           selectedPosts.set(postElement, postData);
+
+          // Prepare data for batch panel
+          repliesData.push({
+            postElement: postElement,
+            tweetData: postData.tweetData,
+            replies: replies
+          });
 
           // Also store in persistent map
           generatedReplies.set(postElement, {
@@ -192,8 +206,14 @@ async function handleBatchGenerate() {
 
         showNotification('success', `Generated replies for ${selectedPosts.size} posts!`);
 
-        // Show first post's replies
-        showBatchRepliesModal();
+        // Show batch replies panel
+        showBatchRepliesPanel(repliesData);
+
+        // Clear selections and exit multiple mode
+        selectedPosts.clear();
+        updateSelectedCount();
+        removeCheckboxesFromPosts();
+        toggleMultipleMode();
 
         resetGenerateButton();
       } else {
@@ -223,48 +243,6 @@ function resetGenerateButton() {
   `;
 }
 
-function showBatchRepliesModal() {
-  const postsWithReplies = Array.from(selectedPosts.values()).filter(item => item.replies);
-
-  if (postsWithReplies.length === 0) {
-    return;
-  }
-
-  const firstPost = postsWithReplies[0];
-  showBatchReplyModalForPost(firstPost.element, firstPost.replies, firstPost.tweetData);
-}
-
-function showBatchReplyModalForPost(postElement, replies, tweetData) {
-  // Use custom modal for batch mode
-  window.showBatchReplyModal(replies, postElement, tweetData, () => {
-    // Callback after reply is sent
-    // Remove this post from the selected list
-    selectedPosts.delete(postElement);
-    generatedReplies.delete(postElement);
-
-    // Uncheck the checkbox
-    const checkbox = postElement.querySelector('.ripple-post-checkbox');
-    if (checkbox) {
-      checkbox.checked = false;
-    }
-
-    updateSelectedCount();
-
-    // Show next post if available
-    const remainingPosts = Array.from(selectedPosts.values()).filter(item => item.replies);
-    if (remainingPosts.length > 0) {
-      const nextPost = remainingPosts[0];
-      setTimeout(() => {
-        showBatchReplyModalForPost(nextPost.element, nextPost.replies, nextPost.tweetData);
-      }, 500);
-    } else {
-      showNotification('success', 'All replies sent!');
-      if (multipleMode) {
-        toggleMultipleMode(); // Exit multiple mode
-      }
-    }
-  });
-}
 
 function initMultipleMode() {
   if (document.getElementById('ripple-multiple-toggle')) {

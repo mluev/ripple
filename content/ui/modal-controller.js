@@ -105,52 +105,8 @@ async function saveExample(text) {
 }
 
 function showReplyModal(replies, postElement) {
-  const existingModals = document.querySelectorAll('.ripple-modal-overlay');
-  existingModals.forEach(m => m.remove());
-
-  const modal = createModalElement(replies);
-
-  // Close button
-  modal.querySelector('.ripple-modal-close').addEventListener('click', () => closeModal(modal));
-
-  // Click outside to close
-  modal.addEventListener('click', (e) => {
-    if (e.target === modal) closeModal(modal);
-  });
-
-  // Escape key
-  const handleEscape = (e) => {
-    if (e.key === 'Escape') {
-      closeModal(modal);
-      document.removeEventListener('keydown', handleEscape);
-    }
-  };
-  document.addEventListener('keydown', handleEscape);
-
-  // Save example buttons
-  modal.querySelectorAll('.save-example-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const index = parseInt(btn.getAttribute('data-index'));
-      saveExample(replies[index]);
-    });
-  });
-
-  // Reply card clicks
-  modal.querySelectorAll('.reply-card').forEach((card, index) => {
-    card.addEventListener('click', async (e) => {
-      // Don't trigger if clicking save button
-      if (e.target.closest('.save-example-btn')) return;
-
-      closeModal(modal);
-      await insertTextIntoReply(replies[index], postElement);
-    });
-  });
-
-  document.body.appendChild(modal);
-  requestAnimationFrame(() => {
-    modal.classList.add('ripple-modal-visible');
-  });
+  // Use the new bottom-of-post UI instead of modal
+  showRepliesForPost(postElement, replies);
 }
 
 window.showReplyModal = showReplyModal;
