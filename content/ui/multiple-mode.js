@@ -39,7 +39,7 @@ function createGenerateButton() {
       <path d="M16 8 2 22"></path>
       <path d="M17.5 15H9"></path>
     </svg>
-    <span>Generate Replies (<span id="selected-count">0</span>)</span>
+    <span>Generate (<span id="selected-count">0</span>)</span>
   `;
   button.addEventListener('click', handleBatchGenerate);
   return button;
@@ -239,7 +239,7 @@ function resetGenerateButton() {
       <path d="M16 8 2 22"></path>
       <path d="M17.5 15H9"></path>
     </svg>
-    <span>Generate Replies (<span id="selected-count">${selectedPosts.size}</span>)</span>
+    <span>Generate (<span id="selected-count">${selectedPosts.size}</span>)</span>
   `;
 }
 
